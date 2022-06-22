@@ -34,29 +34,6 @@ export class UsersService {
     } catch (error) {
       throw new Error(error);
     }
-
-    // let Role: Role;
-    // const result: Prisma.UserCreateInput = data;
-    // for (let index = 0; index < 10; index++) {
-    //   if (index <= 5) {
-    //     Role = 'USER';
-    //   } else {
-    //     Role = 'VENDOR';
-    //   }
-    //   await this.prisma.user.create({
-    //     data: {
-    //       first_name: faker.name.firstName(),
-    //       last_name: faker.name.lastName(),
-    //       cpf: faker.phone.number(),
-    //       email: faker.internet.email(),
-    //       password: faker.internet.password(),
-    //       role: Role,
-    //       created_at: faker.date.past(),
-    //     },
-    //   });
-    //   console.log('creating');
-    // }
-    // return 'ok';
   }
 
   async findAll(): Promise<baseResponse<User[]>> {
