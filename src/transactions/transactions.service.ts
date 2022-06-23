@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
-
+import { IBaseResponse } from '../core/dto/base.response.dto';
+import { Transaction } from '@prisma/client';
 @Injectable()
 export class TransactionsService {
-  create(createTransactionDto: CreateTransactionDto) {
-    return 'This action adds a new transaction';
+  constructor(private prisma: PrismaService) {}
+  dataTransaction: Transaction;
+  async create(
+    createTransactionDto: CreateTransactionDto,
+  ): Promise<IBaseResponse<Transaction>> {
+    return { data: this.dataTransaction, message: 'ok' };
   }
 
-  findAll() {
-    return `This action returns all transactions`;
+  async findAll(): Promise<IBaseResponse<Transaction>> {
+    return { data: this.dataTransaction, message: 'ok' };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} transaction`;
+  async findOne(uid: string): Promise<IBaseResponse<Transaction>> {
+    return { data: this.dataTransaction, message: 'ok' };
   }
 
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
+  async update(
+    uid: string,
+    updateTransactionDto: UpdateTransactionDto,
+  ): Promise<IBaseResponse<Transaction>> {
+    return { data: this.dataTransaction, message: 'ok' };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
+  async remove(uid: string): Promise<IBaseResponse<Transaction>> {
+    return { data: this.dataTransaction, message: 'ok' };
   }
 }

@@ -33,10 +33,10 @@ describe('UsersService', () => {
     return mockUser;
   }
 
-  function mockBaseResp(data: User, message: string) {
+  function mockBaseResp(data: User) {
     const resp: baseResponse<User> = {
       data: data,
-      message: message,
+      message: '',
     };
     return resp;
   }
@@ -59,14 +59,14 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
 
-  const mockResponse = mockBaseResp(
-    mockReturnUser(),
-    'user created with sucess.',
-  );
+  const mockResponse = mockBaseResp(mockReturnUser());
   describe('create', () => {
     it('should return a user if this are created with sucess in database', async () => {
+      const mock123 = mockResponse.data;
       jest.spyOn(prismaMock.user, 'create').mockResolvedValue(mockResponse);
-      const result = await service.create(mockResponse.data);
+      const result = await service.create(mock123);
+      console.log(result, '<---');
+      console.log(mockResponse);
       expect(result).toBe(mockResponse);
     });
   });

@@ -1,4 +1,4 @@
-export class baseResponse<T> {
+export interface IBaseResponse<T> {
   data: T;
   message: string;
 }

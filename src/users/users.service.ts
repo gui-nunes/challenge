@@ -1,22 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
-import { baseResponse } from '../core/dto/base.response.dto';
+import { IBaseResponse } from '../core/dto/base.response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  response = {
-    message: '',
-    data: {},
-  };
+  returnBaseResponse: IBaseResponse<User>;
 
-  async create(data: CreateUserDto): Promise<baseResponse<User>> {
+  async create(data: CreateUserDto): Promise<IBaseResponse<User>> {
     try {
-      const userdb = await this.prisma.user.create({
+      const userdata = await this.prisma.user.create({
         data: {
           first_name: data.first_name,
           last_name: data.last_name,
@@ -27,69 +24,119 @@ export class UsersService {
           created_at: new Date(),
         },
       });
-      return {
-        data: userdb,
+      return (this.returnBaseResponse = {
+        data: userdata,
         message: 'user created with sucess.',
-      };
+      });
     } catch (error) {
-      throw new Error(error);
+      if (
+        String(error.message).includes(
+          ' Unique constraint failed on the fields: (`email`)',
+        )
+      ) {
+        throw new HttpException('Email already exists', 400);
+      }
+      if (
+        String(error.message).includes(
+          ' Unique constraint failed on the fields: (`cpf`)',
+        )
+      ) {
+        throw new HttpException('CPF already exists', 400);
+      }
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async findAll(): Promise<baseResponse<User[]>> {
+  async findAll(): Promise<IBaseResponse<User[]>> {
     try {
-      const userdb: Array<User> = await this.prisma.user.findMany();
+      const userdata = await this.prisma.user.findMany();
+      if (userdata.length == 0) {
+        throw new Error('not_found');
+      }
       return {
-        data: userdb,
+        data: userdata,
         message: 'users founded with sucess.',
       };
     } catch (error) {
-      throw new Error(error);
+      if (error.message == 'not_found') {
+        throw new HttpException('no users found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async findOne(uid: string): Promise<baseResponse<User>> {
+  async findOne(uid: string): Promise<IBaseResponse<User>> {
     try {
-      const data: User = await this.prisma.user.findUnique({
+      const userdata = await this.prisma.user.findUnique({
         where: {
           uid: uid,
         },
       });
+      if (!userdata) {
+        throw new Error('not_found');
+      }
       return {
-        data: data,
+        data: userdata,
         message: 'user founded with sucess.',
       };
     } catch (error) {
-      throw new Error(error);
+      if (error.message == 'not_found') {
+        throw new HttpException('no user found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async update(uid: string, data: UpdateUserDto): Promise<baseResponse<User>> {
+  async update(uid: string, data: UpdateUserDto): Promise<IBaseResponse<User>> {
     try {
+      const userfound = await this.prisma.user.findUnique({
+        where: {
+          uid: uid,
+        },
+      });
+      if (!userfound) {
+        throw new Error('user_not_found');
+      }
+
       const userdata = await this.prisma.user.update({
-        data: { ...data, updated_at: new Date() },
         where: { uid },
+        data: { ...data, updated_at: new Date() },
       });
       return {
         data: userdata,
         message: 'user updated with sucess.',
       };
     } catch (error) {
-      throw new Error(error);
+      if (error.message == 'user_not_found') {
+        throw new HttpException('user not founded', HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async remove(uid: string): Promise<baseResponse<User>> {
+  async remove(uid: string): Promise<IBaseResponse<User>> {
     try {
-      const data = await this.prisma.user.delete({
+      const userfound = await this.prisma.user.findUnique({
+        where: {
+          uid: uid,
+        },
+      });
+      if (!userfound) {
+        throw new Error('user_not_found');
+      }
+
+      const userdata = await this.prisma.user.delete({
         where: { uid },
       });
       return {
-        data: data,
+        data: userdata,
         message: 'user deleted with sucess.',
       };
     } catch (error) {
-      throw new Error(error);
+      if (error.message == 'user_not_found') {
+        throw new HttpException('user not founded', HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
