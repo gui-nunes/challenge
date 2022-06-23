@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Wallet } from '@prisma/client';
+import axios from 'axios';
 import { IBaseResponse } from 'src/core/dto/base.response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
@@ -14,6 +15,7 @@ export class WalletService {
       const walletData: Wallet = await this.prisma.wallet.create({
         data: {
           uid_owner: data.uid_owner,
+          balance: data.balance,
         },
       });
 
@@ -82,6 +84,75 @@ export class WalletService {
         throw new HttpException('Wallet not found.', HttpStatus.NOT_FOUND);
       }
       console.log(error);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async bePayd(uid: string, value: any): Promise<string> {
+    try {
+      const walletFound = await this.prisma.wallet.findUnique({
+        where: {
+          uid: uid,
+        },
+      });
+      if (!walletFound) {
+        throw new Error('wallet_not_found');
+      }
+
+      await this.prisma.wallet.update({
+        where: { uid },
+        data: {
+          balance: walletFound.balance + value.balance,
+        },
+      });
+      return 'Transaction realized.';
+    } catch (error) {
+      if (error.message == 'wallet_not_found') {
+        throw new HttpException('wallet not founded', HttpStatus.BAD_REQUEST);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async paySometing(uid: string, amount: number): Promise<string> {
+    try {
+      const walletFound = await this.prisma.wallet.findUnique({
+        where: {
+          uid: uid,
+        },
+      });
+      if (!walletFound) {
+        throw new Error('wallet_not_found');
+      }
+      if (walletFound.balance < amount) {
+        throw new Error('insufficient_fund');
+      }
+      const data = walletFound.balance - amount;
+      const auth = await axios.post(
+        'https://run.mocky.io/v3/8fafdd68-a090-496f-8c9a-3442cf30dae6',
+        [data],
+      );
+      if (auth.data.message !== 'Autorizado') {
+        throw new Error('no_auth');
+      }
+      await this.prisma.wallet.update({
+        where: { uid },
+        data: {
+          balance: walletFound.balance - amount,
+        },
+      });
+      return 'Transaction realized.';
+    } catch (error) {
+      console.log(error);
+      if (error.message == 'insufficient_fund') {
+        throw new HttpException('insufficient fund.', HttpStatus.BAD_REQUEST);
+      }
+      if (error.message == 'no_auth') {
+        throw new HttpException('Not_authorized.', HttpStatus.UNAUTHORIZED);
+      }
+      if (error.message == 'wallet_not_found') {
+        throw new HttpException('wallet not founded', HttpStatus.BAD_REQUEST);
+      }
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
