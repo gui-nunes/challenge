@@ -88,7 +88,7 @@ export class WalletService {
     }
   }
 
-  async bePayd(uid: string, value: any): Promise<string> {
+  async bePayd(uid: string, amount: number): Promise<string> {
     try {
       const walletFound = await this.prisma.wallet.findUnique({
         where: {
@@ -102,10 +102,10 @@ export class WalletService {
       await this.prisma.wallet.update({
         where: { uid },
         data: {
-          balance: walletFound.balance + value.balance,
+          balance: walletFound.balance + amount,
         },
       });
-      return 'Transaction realized.';
+      return 'ok';
     } catch (error) {
       if (error.message == 'wallet_not_found') {
         throw new HttpException('wallet not founded', HttpStatus.BAD_REQUEST);
@@ -141,7 +141,7 @@ export class WalletService {
           balance: walletFound.balance - amount,
         },
       });
-      return 'Transaction realized.';
+      return 'ok';
     } catch (error) {
       console.log(error);
       if (error.message == 'insufficient_fund') {
