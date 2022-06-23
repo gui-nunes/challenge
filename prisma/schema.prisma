@@ -22,7 +22,7 @@ model User {
 
 model Wallet {
   uid               String        @id @default(uuid())
-  balance           Int
+  balance           Int           @default(0)
   uid_owner         String        @unique
   created_at        DateTime      @default(now())
   updated_at        DateTime?
@@ -36,7 +36,6 @@ model Transaction {
   uid_wallet_payer String
   uid_wallet_payee String
   amount           Int
-  helded           Boolean
   held_on          DateTime
   created_at       DateTime @default(now())
   peyee            Wallet   @relation("beneficiario", fields: [uid_wallet_payee], references: [uid])
