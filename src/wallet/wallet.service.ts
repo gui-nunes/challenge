@@ -102,7 +102,7 @@ export class WalletService {
       const typeOfUser = await this.prisma.user.findUnique({
         where: { uid: walletPayerFound.uid_owner },
       });
-      // VERIFICA SE O DONO NAO É VENDEDOR
+      // VERIFICA SE O BENEFICIARIO É VENDEDOR
       if (typeOfUser.role == 'VENDOR') {
         throw new Error('vendors_cannot_pay');
       }
@@ -154,6 +154,15 @@ export class WalletService {
       if (realized !== 'ok') {
         throw new Error('transaction_fail.');
       }
+      //NOTIFICA USUARIO SOBRE O RECEBIMENTO
+      const notify = await axios.post(
+        'http://o4d9z.mocklab.io/notify',
+        `user: ${
+          walletPayeeFound.uid_owner
+        }, type:${'recived'}, value ${amount}`,
+      );
+      console.log(notify);
+      //TRANSAÇÃO FINALIZADA COM SUCESSO
       return 'transaction_realized';
     } catch (error) {
       throw new Error(error);
