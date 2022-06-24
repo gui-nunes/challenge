@@ -2,7 +2,7 @@ import { Transaction } from '@prisma/client';
 import { IsNotEmpty, IsNumber, IsUUID } from 'class-validator';
 
 export class CreateTransactionDto
-  implements Omit<Transaction, 'uid' | 'created_at' | 'held_on'>
+  implements Omit<Transaction, 'uid' | 'created_at'>
 {
   @IsUUID('4')
   @IsNotEmpty({ message: 'UUID of payer not can be empty' })
