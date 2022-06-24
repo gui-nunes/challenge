@@ -26,7 +26,7 @@ model Wallet {
   uid_owner         String        @unique
   created_at        DateTime      @default(now())
   updated_at        DateTime?
-  owner             User          @relation(fields: [uid_owner], references: [uid])
+  owner             User          @relation(fields: [uid_owner], references: [uid], onDelete: Cascade)
   Transaction_payee Transaction[] @relation("beneficiario")
   Transaction_payer Transaction[] @relation("pagante")
 }
@@ -37,8 +37,8 @@ model Transaction {
   uid_wallet_payee String
   amount           Int
   created_at       DateTime @default(now())
-  peyee            Wallet   @relation("beneficiario", fields: [uid_wallet_payee], references: [uid])
-  payer            Wallet   @relation("pagante", fields: [uid_wallet_payer], references: [uid])
+  peyee            Wallet   @relation("beneficiario", fields: [uid_wallet_payee], references: [uid], onDelete: Cascade)
+  payer            Wallet   @relation("pagante", fields: [uid_wallet_payer], references: [uid], onDelete: Cascade)
 }
 
 enum Role {

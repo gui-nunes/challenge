@@ -1,57 +1,42 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { IBaseResponse } from '../core/dto/base.response.dto';
 import { Transaction } from '@prisma/client';
 import { WalletService } from 'src/wallet/wallet.service';
-import { Axios } from 'axios';
-import { UsersService } from 'src/users/users.service';
 @Injectable()
 export class TransactionsService {
-  constructor(
-    private prisma: PrismaService,
-    private wallet: WalletService,
-    private users: UsersService,
-  ) {}
+  constructor(private prisma: PrismaService, private wallet: WalletService) {}
   dataTransaction: Transaction;
 
-  async create(data: CreateTransactionDto): Promise<any> {
+  async create(
+    data: CreateTransactionDto,
+  ): Promise<IBaseResponse<Transaction>> {
     try {
-      const payeeAmount = await this.wallet.paySometing(
-        data.uid_wallet_payer,
-        data.amount,
-      );
-      if (payeeAmount !== 'ok') {
-        throw new Error(payeeAmount);
+      if (data.amount == 0) {
+        throw new Error('amount_zero');
       }
-      const reciveAmount = await this.wallet.bePayd(
+      const transaction = await this.wallet.transfer(
+        data.uid_wallet_payer,
         data.uid_wallet_payee,
         data.amount,
       );
-      if (reciveAmount !== 'ok') {
-        throw new Error(reciveAmount);
+      if (transaction !== 'transaction_realized') {
+        throw new Error('transaction_fail.');
       }
-
-      const saved = await this.prisma.transaction.create({
+      const transactionData = await this.prisma.transaction.create({
         data: {
-          amount: data.amount,
           uid_wallet_payee: data.uid_wallet_payee,
           uid_wallet_payer: data.uid_wallet_payer,
+          amount: data.amount,
         },
       });
-      console.log(saved);
-      if (!saved) {
-        throw new Error('error on save in db.');
+
+      if (!transactionData) {
+        throw new Error();
       }
 
-      const payerWaller = await this.wallet.findOne(data.uid_wallet_payer);
-      const payeeWaller = await this.wallet.findOne(data.uid_wallet_payee);
-
-      const payerName = await this.users.findOne(payerWaller.data.uid_owner);
-      const payeeName = await this.users.findOne(payeeWaller.data.uid_owner);
-
-      return `${payerName.data.first_name} pagou a ${payeeName.data.first_name} o montante de: $${data.amount} `;
+      return { data: transactionData, message: 'transaction done' };
     } catch (error) {
       console.log(error);
       if (error.message == 'insufficient_fund') {
@@ -67,22 +52,44 @@ export class TransactionsService {
     }
   }
 
-  async findAll(): Promise<IBaseResponse<Transaction>> {
-    return { data: this.dataTransaction, message: 'ok' };
+  async findAll(): Promise<IBaseResponse<Transaction[]>> {
+    try {
+      const transactionData: Transaction[] =
+        await this.prisma.transaction.findMany();
+      if (transactionData.length == 0) {
+        throw new Error('no_transaction_found');
+      }
+      return { data: transactionData, message: 'transactions found.' };
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async findOne(uid: string): Promise<IBaseResponse<Transaction>> {
-    return { data: this.dataTransaction, message: 'ok' };
+    try {
+      const transactionData = await this.prisma.transaction.findUnique({
+        where: {
+          uid,
+        },
+      });
+      if (!transactionData) {
+        throw new Error('not_found');
+      }
+      return { data: transactionData, message: 'transaction found.' };
+    } catch (error) {
+      if (error.message == 'not_found') {
+        throw new HttpException('Transaction Not Found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  async update(
-    uid: string,
-    updateTransactionDto: UpdateTransactionDto,
-  ): Promise<IBaseResponse<Transaction>> {
-    return { data: this.dataTransaction, message: 'ok' };
-  }
-
-  async remove(uid: string): Promise<IBaseResponse<Transaction>> {
-    return { data: this.dataTransaction, message: 'ok' };
+  async remove(uid: string): Promise<IBaseResponse<any>> {
+    try {
+      const transactionData = this.prisma.transaction.delete({
+        where: { uid },
+      });
+      return { data: transactionData, message: 'transactions found.' };
+    } catch (error) {}
   }
 }
