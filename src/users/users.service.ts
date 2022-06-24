@@ -65,6 +65,25 @@ export class UsersService {
     }
   }
 
+  async login(first_name: string): Promise<User> {
+    try {
+      const userdata = await this.prisma.user.findFirst({
+        where: {
+          first_name: first_name,
+        },
+      });
+      if (!userdata) {
+        throw new Error('not_found');
+      }
+      return userdata;
+    } catch (error) {
+      if (error.message == 'not_found') {
+        throw new HttpException('no user found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   async findOne(uid: string): Promise<IBaseResponse<User>> {
     try {
       const userdata = await this.prisma.user.findUnique({

@@ -6,13 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { Wallet } from '@prisma/client';
 import { IBaseResponse } from '../core/dto/base.response.dto';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 
+@UseGuards(LocalAuthGuard)
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}

@@ -3,7 +3,6 @@ import { User } from '@prisma/client';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { faker } from '@faker-js/faker';
-import { baseResponse } from '../core/dto/base.response.dto';
 
 describe('UsersController', () => {
   let controller: UsersController;
