@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { IBaseResponse } from '../core/dto/base.response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Unprotected } from 'nest-keycloak-connect';
 
 @Injectable()
 export class UsersService {
@@ -65,6 +66,7 @@ export class UsersService {
     }
   }
 
+  @Unprotected()
   async login(first_name: string): Promise<User> {
     try {
       const userdata = await this.prisma.user.findFirst({

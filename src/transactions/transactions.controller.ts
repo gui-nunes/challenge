@@ -11,9 +11,7 @@ import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { Transaction } from '@prisma/client';
 import { IBaseResponse } from '../core/dto/base.response.dto';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 
-@UseGuards(LocalAuthGuard)
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}

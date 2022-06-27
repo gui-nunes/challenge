@@ -1,11 +1,11 @@
-import { Controller, Request, Post, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Request, Post } from '@nestjs/common';
+import { Unprotected } from 'nest-keycloak-connect';
 
 @Controller()
 export class AppController {
-  @UseGuards(AuthGuard('local'))
   @Post('auth/login')
+  @Unprotected()
   async login(@Request() req) {
-    return req.user;
+    return req.body;
   }
 }
