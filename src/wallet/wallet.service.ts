@@ -83,7 +83,6 @@ export class WalletService {
       if (error.message == 'not_found') {
         throw new HttpException('Wallet not found.', HttpStatus.NOT_FOUND);
       }
-      console.log(error);
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }

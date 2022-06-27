@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { faker } from '@faker-js/faker';
-import { baseResponse } from '../core/dto/base.response.dto';
+import { IBaseResponse } from 'src/core/dto/base.response.dto';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -49,7 +49,7 @@ describe('UsersController', () => {
     expect(controller).toBeDefined();
   });
 
-  const baseMock: baseResponse<User> = {
+  const baseMock: IBaseResponse<User> = {
     data: mockReturnUser(),
     message: 'ok',
   };
@@ -69,7 +69,7 @@ describe('UsersController', () => {
 
   describe('findAll', () => {
     it('should return a list of users', async () => {
-      const baseMockArray: baseResponse<User[]> = {
+      const baseMockArray: IBaseResponse<User[]> = {
         data: [mockReturnUser(), mockReturnUser()],
         message: 'ok',
       };

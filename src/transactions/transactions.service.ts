@@ -38,7 +38,6 @@ export class TransactionsService {
 
       return { data: transactionData, message: 'transaction done' };
     } catch (error) {
-      console.log(error);
       if (error.message == 'insufficient_fund') {
         throw new HttpException('insufficient fund.', HttpStatus.BAD_REQUEST);
       }

@@ -65,8 +65,6 @@ describe('UsersService', () => {
       const mock123 = mockResponse.data;
       jest.spyOn(prismaMock.user, 'create').mockResolvedValue(mockResponse);
       const result = await service.create(mock123);
-      console.log(result, '<---');
-      console.log(mockResponse);
       expect(result).toBe(mockResponse);
     });
   });

@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { IBaseResponse } from 'src/core/dto/base.response.dto';
 import { WalletService } from 'src/wallet/wallet.service';
+import { Unprotected } from 'nest-keycloak-connect';
 
 @Controller('users')
 export class UsersController {
@@ -22,6 +23,7 @@ export class UsersController {
   ) {}
 
   @Post()
+  @Unprotected()
   async create(@Body() data: CreateUserDto): Promise<IBaseResponse<User>> {
     return await this.usersService.create(data);
   }
@@ -44,6 +46,7 @@ export class UsersController {
     return await this.usersService.update(uid, data);
   }
   // DEPOSIT-------------------------------------------
+
   @Patch('/:uid/deposit')
   async deposite(
     @Param('uid') uid: string,
@@ -52,6 +55,7 @@ export class UsersController {
     return await this.walletService.deposite(uid, data);
   }
   // -------------------------------------
+
   @Delete(':uid')
   async remove(@Param('uid') uid: string): Promise<IBaseResponse<User>> {
     return await this.usersService.remove(uid);

@@ -8,5 +8,6 @@ import { WalletService } from 'src/wallet/wallet.service';
   imports: [PrismaModule],
   controllers: [UsersController],
   providers: [UsersService, WalletService],
+  exports: [UsersService],
 })
 export class UsersModule {}

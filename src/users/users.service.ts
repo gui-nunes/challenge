@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { IBaseResponse } from '../core/dto/base.response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Unprotected } from 'nest-keycloak-connect';
 
 @Injectable()
 export class UsersService {
@@ -62,6 +63,26 @@ export class UsersService {
         throw new HttpException('no users found', HttpStatus.NOT_FOUND);
       }
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Unprotected()
+  async login(first_name: string): Promise<User> {
+    try {
+      const userdata = await this.prisma.user.findFirst({
+        where: {
+          first_name: first_name,
+        },
+      });
+      if (!userdata) {
+        throw new Error('not_found');
+      }
+      return userdata;
+    } catch (error) {
+      if (error.message == 'not_found') {
+        throw new HttpException('no user found', HttpStatus.NOT_FOUND);
+      }
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
