@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { User } from '@prisma/client';
 import { faker } from '@faker-js/faker';
-import { baseResponse } from '../core/dto/base.response.dto';
+import { IBaseResponse } from '../core/dto/base.response.dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 describe('UsersService', () => {
@@ -34,7 +34,7 @@ describe('UsersService', () => {
   }
 
   function mockBaseResp(data: User) {
-    const resp: baseResponse<User> = {
+    const resp: IBaseResponse<User> = {
       data: data,
       message: '',
     };

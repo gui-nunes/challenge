@@ -1,11 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
-import { CreateUserDto } from './dto/create-user.dto';
 import { IBaseResponse } from '../core/dto/base.response.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Unprotected } from 'nest-keycloak-connect';
-
+import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
@@ -20,7 +19,7 @@ export class UsersService {
           last_name: data.last_name,
           cpf: data.cpf,
           email: data.email,
-          password: data.password,
+          password: await bcrypt.hash(data.password, 10),
           role: data.role,
           created_at: new Date(),
         },
@@ -48,14 +47,15 @@ export class UsersService {
     }
   }
 
-  async findAll(): Promise<IBaseResponse<User[]>> {
+  async findAll(): Promise<IBaseResponse<string[]>> {
     try {
       const userdata = await this.prisma.user.findMany();
       if (userdata.length == 0) {
         throw new Error('not_found');
       }
+      const first_name: string[] = userdata.map((user) => user.first_name);
       return {
-        data: userdata,
+        data: first_name,
         message: 'users founded with sucess.',
       };
     } catch (error) {
@@ -66,7 +66,6 @@ export class UsersService {
     }
   }
 
-  @Unprotected()
   async login(first_name: string): Promise<User> {
     try {
       const userdata = await this.prisma.user.findFirst({

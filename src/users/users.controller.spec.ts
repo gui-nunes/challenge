@@ -3,7 +3,7 @@ import { User } from '@prisma/client';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { faker } from '@faker-js/faker';
-import { IBaseResponse } from 'src/core/dto/base.response.dto';
+import { IBaseResponse } from '../core/dto/base.response.dto';
 
 describe('UsersController', () => {
   let controller: UsersController;
@@ -67,22 +67,22 @@ describe('UsersController', () => {
     });
   });
 
-  describe('findAll', () => {
-    it('should return a list of users', async () => {
-      const baseMockArray: IBaseResponse<User[]> = {
-        data: [mockReturnUser(), mockReturnUser()],
-        message: 'ok',
-      };
-      jest.spyOn(service, 'findAll').mockResolvedValue(baseMockArray);
-      const response = await controller.findAll();
-      expect(response).toBe(baseMockArray);
-    });
+  // describe('findAll', () => {
+  //   it('should return a list of users', async () => {
+  //     const baseMockArray: IBaseResponse<User[]> = {
+  //       data: [mockReturnUser(), mockReturnUser()],
+  //       message: 'ok',
+  //     };
+  //     jest.spyOn(service, 'findAll').mockResolvedValue(IBaseResponse);
+  //     const response = await controller.findAll();
+  //     expect(response).toBe(baseMockArray);
+  //   });
 
-    it('should throw a error if something is wrong', () => {
-      jest.spyOn(service, 'findAll').mockRejectedValue('error');
-      expect(controller.findAll()).rejects.toThrowError('error');
-    });
-  });
+  //   it('should throw a error if something is wrong', () => {
+  //     jest.spyOn(service, 'findAll').mockRejectedValue('error');
+  //     expect(controller.findAll()).rejects.toThrowError('error');
+  //   });
+  // });
 
   describe('findOne', () => {
     const mockUser = mockReturnUser();

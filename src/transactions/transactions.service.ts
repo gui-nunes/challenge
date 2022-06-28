@@ -3,7 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { IBaseResponse } from '../core/dto/base.response.dto';
 import { Transaction } from '@prisma/client';
-import { WalletService } from 'src/wallet/wallet.service';
+import { WalletService } from '../wallet/wallet.service';
 @Injectable()
 export class TransactionsService {
   constructor(private prisma: PrismaService, private wallet: WalletService) {}

@@ -6,18 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
 import { Wallet } from '@prisma/client';
 import { IBaseResponse } from '../core/dto/base.response.dto';
+import { JwtAuthGuard } from '../core/auth/jwt-auth.guard';
 
 @Controller('wallet')
 export class WalletController {
   constructor(private readonly walletService: WalletService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   async create(
     @Body() createWalletDto: CreateWalletDto,
   ): Promise<IBaseResponse<Wallet>> {
